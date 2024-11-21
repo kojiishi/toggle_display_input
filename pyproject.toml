@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "toggle-display-input"
-version = "0.1.0"
+version = "0.1.1a2"
 description = ""
 authors = ["Your Name <you@example.com>"]
 readme = "README.md"
@@ -10,7 +10,7 @@ python = "^3.10"
 monitorcontrol = "^3.1.0"
 
 [tool.poetry.scripts]
-toggle_display_input = "toggle_display_input.__main__:main"
+toggle_display_input = "toggle_display_input.toggle_display_input:run"
 
 [build-system]
 requires = ["poetry-core"]

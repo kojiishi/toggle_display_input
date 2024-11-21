@@ -44,4 +44,5 @@ def run_by_ddm():
     proc = subprocess.run([ddm, "/Console", "start", "/ReadActiveInput"], capture_output=True, text=True)
     print(proc)
 
-run()
+if __name__ == '__main__':
+    run()
