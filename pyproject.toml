@@ -10,7 +10,7 @@ python = "^3.10"
 monitorcontrol = "^3.1.0"
 
 [tool.poetry.scripts]
-toggle_display_input = "toggle_display_input.__mnain__:main"
+toggle_display_input = "toggle_display_input.__main__:main"
 
 [build-system]
 requires = ["poetry-core"]
