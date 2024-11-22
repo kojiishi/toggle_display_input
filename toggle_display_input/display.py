@@ -52,6 +52,7 @@ class Display:
         for monitor in monitors:
             display = Display(monitor)
             with monitor:
+                if args.verbose > 1: print(display._vcp_capabilities)
                 model = display._model
                 alt_input_source = alt_input_sources.get(model)
                 if alt_input_source is None:
