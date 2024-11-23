@@ -5,7 +5,6 @@
 # over the Display Data Channel Command Interface Standard (DDC-CI).
 #
 import argparse
-from typing import Union
 
 # https://newam.github.io/monitorcontrol/api.html
 import monitorcontrol
@@ -33,7 +32,7 @@ class Display:
         return self._vcp_capabilities["model"]
 
     @property
-    def _input_source(self) -> Union[monitorcontrol.InputSource, int]:
+    def _input_source(self) -> monitorcontrol.InputSource | int:
         try:
             return self._monitor.get_input_source()
         except monitorcontrol.monitorcontrol.InputSourceValueError as e:
