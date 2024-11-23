@@ -5,12 +5,13 @@
 # over the Display Data Channel Command Interface Standard (DDC-CI).
 #
 import argparse
+from typing import Union
 
 # https://newam.github.io/monitorcontrol/api.html
 import monitorcontrol
-# https://github.com/newAM/monitorcontrol/issues/170
-monitorcontrol.InputSource.USBC1 = 27
 
+# https://github.com/newAM/monitorcontrol/issues/170
+primary_input_source = 27
 alt_input_sources = {
     "U2723QX": monitorcontrol.InputSource.DP1,
     "P3223QE": monitorcontrol.InputSource.HDMI1,
@@ -32,14 +33,14 @@ class Display:
         return self._vcp_capabilities["model"]
 
     @property
-    def _input_source(self):
+    def _input_source(self) -> Union[monitorcontrol.InputSource, int]:
         try:
             return self._monitor.get_input_source()
-        except monitorcontrol.monitorcontrol.InputSourceValueError:
+        except monitorcontrol.monitorcontrol.InputSourceValueError as e:
             # `get_input_source` fails if the current is USB.
             # https://github.com/newAM/monitorcontrol/issues/170
             # https://github.com/newAM/monitorcontrol/issues/258
-            return monitorcontrol.InputSource.USBC1
+            return e.value
 
     @_input_source.setter
     def _input_source(self, input_source):
@@ -47,7 +48,7 @@ class Display:
 
     @staticmethod
     def toggle_all(args):
-        is_current_usb_c = None
+        is_current_primary = None
         monitors = monitorcontrol.get_monitors()
         for monitor in monitors:
             display = Display(monitor)
@@ -59,15 +60,14 @@ class Display:
                     if args.verbose: print(f'{model}: No changes')
                     continue
 
-                if is_current_usb_c is None:
-                    is_current_usb_c = display._input_source == monitorcontrol.InputSource.USBC1
+                if is_current_primary is None:
+                    is_current_primary = display._input_source == primary_input_source
 
-                if is_current_usb_c:
-                    print(f'{model}: Switch to {alt_input_source}')
+                if is_current_primary:
                     new_input_source = alt_input_source
                 else:
-                    print(f'{model}: Switch to USB-C')
-                    new_input_source = monitorcontrol.InputSource.USBC1
+                    new_input_source = primary_input_source
+                print(f'{model}: Switch to {new_input_source}')
                 if not args.dryrun:
                     display._input_source = new_input_source
 
