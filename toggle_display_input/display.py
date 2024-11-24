@@ -16,6 +16,7 @@ alt_input_sources = {
     "P3223QE": monitorcontrol.InputSource.HDMI1,
 }
 
+
 class Display:
     def __init__(self, monitor: monitorcontrol.Monitor):
         self._monitor = monitor
@@ -52,11 +53,13 @@ class Display:
         for monitor in monitors:
             display = Display(monitor)
             with monitor:
-                if args.verbose > 1: print(display._vcp_capabilities)
+                if args.verbose > 1:
+                    print(display._vcp_capabilities)
                 model = display._model
                 alt_input_source = alt_input_sources.get(model)
                 if alt_input_source is None:
-                    if args.verbose: print(f'{model}: No changes')
+                    if args.verbose:
+                        print(f"{model}: No changes")
                     continue
 
                 if is_current_primary is None:
@@ -66,24 +69,30 @@ class Display:
                     new_input_source = alt_input_source
                 else:
                     new_input_source = primary_input_source
-                print(f'{model}: Switch to {new_input_source}')
+                print(f"{model}: Switch to {new_input_source}")
                 if not args.dryrun:
                     display._input_source = new_input_source
 
     @staticmethod
     def run_by_ddm():
         import subprocess
+
         ddm = "C:/Program Files/Dell/Dell Display Manager 2/DDM"
-        proc = subprocess.run([ddm, "/Console", "start", "/ReadActiveInput"], capture_output=True, text=True)
+        proc = subprocess.run(
+            [ddm, "/Console", "start", "/ReadActiveInput"],
+            capture_output=True,
+            text=True,
+        )
         print(proc)
 
     @staticmethod
     def toggle_cmd():
         parser = argparse.ArgumentParser()
-        parser.add_argument('-n', '--dryrun', action='store_true')
-        parser.add_argument('-v', '--verbose', action='count', default=0)
+        parser.add_argument("-n", "--dryrun", action="store_true")
+        parser.add_argument("-v", "--verbose", action="count", default=0)
         args = parser.parse_args()
         Display.toggle_all(args)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     Display.toggle_cmd()
