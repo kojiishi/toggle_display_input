@@ -79,6 +79,8 @@ class Display:
             for monitor, model in zip(monitors, models):
                 if alt_input_sources.get(model) is not None:
                     filtered_monitors.append(monitor)
+                elif args.verbose > 1:
+                    print(f"Skipped {model} by the cached name")
             monitors = filtered_monitors
         else:
             models = []
@@ -117,7 +119,6 @@ class Display:
         config.read(Display.models_cache_path())
         try:
             models_str = config.get("DEFAULT", "models")
-            print(models_str)
             return json.loads(models_str)
         except configparser.NoOptionError:
             return []
