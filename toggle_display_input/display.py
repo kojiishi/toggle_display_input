@@ -67,32 +67,23 @@ class Display:
     @staticmethod
     def toggle_all(args):
         monitors = monitorcontrol.get_monitors()
+        displays = [Display(monitor) for monitor in monitors]
 
-        # Check the cached model names.
-        update_models = False
-        models = Display.models_cache()
-        if args.verbose > 1:
-            print(f"Cached models={models}")
-        if len(models) == len(monitors):
-            # Use the cached model names.
-            filtered_monitors = []
-            for monitor, model in zip(monitors, models):
-                if alt_input_sources.get(model) is not None:
-                    filtered_monitors.append(monitor)
-                elif args.verbose > 1:
-                    print(f"Skipped {model} by the cached name")
-            monitors = filtered_monitors
+        filtered_displays = Display.filter_by_cached_models(
+            displays, verbose=args.verbose
+        )
+        if filtered_displays is not None:
+            displays = filtered_displays
+            models = None
         else:
             models = []
-            update_models = True
 
-        for monitor in monitors:
-            display = Display(monitor)
-            with monitor:
+        for display in displays:
+            with display._monitor:
                 if args.verbose > 1:
                     print(display._vcp_capabilities)
                 model = display._model
-                if update_models:
+                if models is not None:
                     models.append(model)
                 alt_input_source = alt_input_sources.get(model)
                 if alt_input_source is None:
@@ -108,13 +99,28 @@ class Display:
                 if not args.dryrun:
                     display._input_source = new_input_source
 
-        if update_models:
+        if models is not None:
             if args.verbose > 1:
                 print(f"Saving models {models} to {Display.models_cache_path()}")
             Display.save_models_cache(models)
 
     @staticmethod
-    def models_cache() -> List[str]:
+    def filter_by_cached_models(
+        displays: List["Display"], verbose: int = 0
+    ) -> List["Display"] | None:
+        models = Display.load_models_cache()
+        if len(displays) != len(models):
+            return None
+        filtered = []
+        for display, model in zip(displays, models):
+            if alt_input_sources.get(model) is not None:
+                filtered.append(display)
+            elif verbose > 1:
+                print(f'Skipped "{model}" by the cached model.')
+        return filtered
+
+    @staticmethod
+    def load_models_cache() -> List[str]:
         config = configparser.ConfigParser()
         config.read(Display.models_cache_path())
         try:
