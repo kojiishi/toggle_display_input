@@ -1,8 +1,8 @@
 [tool.poetry]
 name = "toggle-display-input"
-version = "0.1.1a8"
+version = "0.1.1a9"
 description = ""
-authors = ["Your Name <you@example.com>"]
+authors = ["Koji Ishii <kojiishi@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
