@@ -49,9 +49,17 @@ class Display:
     def _input_source(self, input_source: InputSource) -> None:
         self._monitor.set_input_source(input_source)
 
+    _is_current_primary_cache: bool | None = None
+
+    @property
+    def _is_current_primary(self) -> bool:
+        if Display._is_current_primary_cache is None:
+            Display._is_current_primary_cache = self._input_source == primary_input_source
+        return Display._is_current_primary_cache
+
+
     @staticmethod
     def toggle_all(args):
-        is_current_primary = None
         monitors = monitorcontrol.get_monitors()
         for monitor in monitors:
             display = Display(monitor)
@@ -65,10 +73,7 @@ class Display:
                         print(f"{model}: No changes")
                     continue
 
-                if is_current_primary is None:
-                    is_current_primary = display._input_source == primary_input_source
-
-                if is_current_primary:
+                if display._is_current_primary:
                     new_input_source = alt_input_source
                 else:
                     new_input_source = primary_input_source
