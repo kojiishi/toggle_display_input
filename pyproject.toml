@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "toggle-display-input"
-version = "0.1.1a9"
+version = "0.1.1a10"
 description = ""
 authors = ["Koji Ishii <kojiishi@gmail.com>"]
 readme = "README.md"
@@ -8,6 +8,7 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.10"
 monitorcontrol = "^3.1.0"
+platformdirs = "^4.3.6"
 
 [tool.poetry.scripts]
 toggle-display-input = "toggle_display_input.display:Display.toggle_cmd"

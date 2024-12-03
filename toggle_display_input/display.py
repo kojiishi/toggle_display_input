@@ -5,6 +5,11 @@
 # over the Display Data Channel Command Interface Standard (DDC-CI).
 #
 import argparse
+import configparser
+import json
+import os
+import platformdirs
+from typing import List
 from typing import TypeAlias
 
 # https://newam.github.io/monitorcontrol/api.html
@@ -54,19 +59,39 @@ class Display:
     @property
     def _is_current_primary(self) -> bool:
         if Display._is_current_primary_cache is None:
-            Display._is_current_primary_cache = self._input_source == primary_input_source
+            Display._is_current_primary_cache = (
+                self._input_source == primary_input_source
+            )
         return Display._is_current_primary_cache
-
 
     @staticmethod
     def toggle_all(args):
         monitors = monitorcontrol.get_monitors()
+
+        # Check the cached model names.
+        update_models = False
+        models = Display.models_cache()
+        if args.verbose > 1:
+            print(f"Cached models={models}")
+        if len(models) == len(monitors):
+            # Use the cached model names.
+            filtered_monitors = []
+            for monitor, model in zip(monitors, models):
+                if alt_input_sources.get(model) is not None:
+                    filtered_monitors.append(monitor)
+            monitors = filtered_monitors
+        else:
+            models = []
+            update_models = True
+
         for monitor in monitors:
             display = Display(monitor)
             with monitor:
                 if args.verbose > 1:
                     print(display._vcp_capabilities)
                 model = display._model
+                if update_models:
+                    models.append(model)
                 alt_input_source = alt_input_sources.get(model)
                 if alt_input_source is None:
                     if args.verbose:
@@ -80,6 +105,37 @@ class Display:
                 print(f"{model}: Switch to {new_input_source}")
                 if not args.dryrun:
                     display._input_source = new_input_source
+
+        if update_models:
+            if args.verbose > 1:
+                print(f"Saving models {models} to {Display.models_cache_path()}")
+            Display.save_models_cache(models)
+
+    @staticmethod
+    def models_cache() -> List[str]:
+        config = configparser.ConfigParser()
+        config.read(Display.models_cache_path())
+        try:
+            models_str = config.get("DEFAULT", "models")
+            print(models_str)
+            return json.loads(models_str)
+        except configparser.NoOptionError:
+            return []
+
+    @staticmethod
+    def save_models_cache(models: List[str]) -> None:
+        config = configparser.ConfigParser()
+        config.set("DEFAULT", "models", json.dumps(models))
+        path = Display.models_cache_path()
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, "w") as file:
+            config.write(file)
+
+    @staticmethod
+    def models_cache_path() -> str:
+        return os.path.join(
+            platformdirs.user_cache_dir("display", "kojii"), "display.toml"
+        )
 
     @staticmethod
     def run_by_ddm():
