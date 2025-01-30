@@ -54,16 +54,6 @@ class Display:
     def _input_source(self, input_source: InputSource) -> None:
         self._monitor.set_input_source(input_source)
 
-    _is_current_primary_cache: bool | None = None
-
-    @property
-    def _is_current_primary(self) -> bool:
-        if Display._is_current_primary_cache is None:
-            Display._is_current_primary_cache = (
-                self._input_source == primary_input_source
-            )
-        return Display._is_current_primary_cache
-
     @staticmethod
     def toggle_all(args):
         monitors = monitorcontrol.get_monitors()
@@ -78,6 +68,17 @@ class Display:
         else:
             models = []
 
+        if args.target == "usb":
+            is_current_primary = False
+        elif args.target == "alt":
+            is_current_primary = True
+        elif args.target is None:
+            is_current_primary = None
+        else:
+            raise ValueError(
+                'The target "{}" must be "usb" or "alt".'.format(args.target)
+            )
+
         for display in displays:
             with display._monitor:
                 if args.verbose > 1:
@@ -91,7 +92,9 @@ class Display:
                         print(f"{model}: No changes")
                     continue
 
-                if display._is_current_primary:
+                if is_current_primary is None:
+                    is_current_primary = display._input_source == primary_input_source
+                if is_current_primary:
                     new_input_source = alt_input_source
                 else:
                     new_input_source = primary_input_source
@@ -161,6 +164,7 @@ class Display:
         parser = argparse.ArgumentParser()
         parser.add_argument("-n", "--dryrun", action="store_true")
         parser.add_argument("-v", "--verbose", action="count", default=0)
+        parser.add_argument("target", nargs="?", help="usb|alt")
         args = parser.parse_args()
         Display.toggle_all(args)
 
