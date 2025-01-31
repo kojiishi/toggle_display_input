@@ -68,17 +68,6 @@ class Display:
         else:
             models = []
 
-        if args.target == "usb":
-            is_current_primary = False
-        elif args.target == "alt":
-            is_current_primary = True
-        elif args.target is None:
-            is_current_primary = None
-        else:
-            raise ValueError(
-                'The target "{}" must be "usb" or "alt".'.format(args.target)
-            )
-
         for display in displays:
             with display._monitor:
                 if args.verbose > 1:
@@ -92,9 +81,9 @@ class Display:
                         print(f"{model}: No changes")
                     continue
 
-                if is_current_primary is None:
-                    is_current_primary = display._input_source == primary_input_source
-                if is_current_primary:
+                if args.is_current_primary is None:
+                    args.is_current_primary = display._input_source == primary_input_source
+                if args.is_current_primary:
                     new_input_source = alt_input_source
                 else:
                     new_input_source = primary_input_source
@@ -166,6 +155,18 @@ class Display:
         parser.add_argument("-v", "--verbose", action="count", default=0)
         parser.add_argument("target", nargs="?", help="usb|alt")
         args = parser.parse_args()
+
+        if args.target == "usb":
+            args.is_current_primary = False
+        elif args.target == "alt":
+            args.is_current_primary = True
+        elif args.target is None:
+            args.is_current_primary = None
+        else:
+            raise ValueError(
+                'The target "{}" must be "usb" or "alt".'.format(args.target)
+            )
+
         Display.toggle_all(args)
 
 
