@@ -82,7 +82,9 @@ class Display:
                     continue
 
                 if args.is_current_primary is None:
-                    args.is_current_primary = display._input_source == primary_input_source
+                    args.is_current_primary = (
+                        display._input_source == primary_input_source
+                    )
                 if args.is_current_primary:
                     new_input_source = alt_input_source
                 else:
