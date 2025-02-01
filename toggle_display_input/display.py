@@ -5,7 +5,6 @@
 # over the Display Data Channel Command Interface Standard (DDC-CI).
 #
 import argparse
-import configparser
 import json
 import os
 import platformdirs
@@ -29,6 +28,9 @@ class Display:
     def __init__(self, monitor: monitorcontrol.Monitor):
         self._monitor = monitor
         self._vcp_capabilities_cache = None
+        self._model_cache = None
+
+    _is_cache_changed = False
 
     @staticmethod
     def get_all() -> List["Display"]:
@@ -43,7 +45,10 @@ class Display:
 
     @property
     def _model(self) -> str:
-        return self._vcp_capabilities["model"]
+        if self._model_cache is None:
+            self._model_cache = self._vcp_capabilities["model"]
+            Display._is_cache_changed = True
+        return self._model_cache
 
     @property
     def _input_source(self) -> InputSource:
@@ -62,23 +67,20 @@ class Display:
     @staticmethod
     def toggle_all(args):
         displays = Display.get_all()
-
-        filtered_displays = Display.filter_by_cached_models(
-            displays, verbose=args.verbose
-        )
-        if filtered_displays is not None:
-            displays = filtered_displays
-            models = None
-        else:
-            models = []
-
+        Display.load_cache(displays, verbose=args.verbose)
         for display in displays:
+            # Check the `_model_cache` before to avoid unnecessary `with`.
+            if (
+                display._model_cache is not None
+                and alt_input_sources.get(display._model_cache) is None
+            ):
+                if args.verbose > 1:
+                    print(f"{display._model_cache}: No changes (cached)")
+                continue
             with display._monitor:
                 if args.verbose > 1:
                     print(display._vcp_capabilities)
                 model = display._model
-                if models is not None:
-                    models.append(model)
                 alt_input_source = alt_input_sources.get(model)
                 if alt_input_source is None:
                     if args.verbose:
@@ -97,49 +99,40 @@ class Display:
                 if not args.dryrun:
                     display._input_source = new_input_source
 
-        if models is not None:
-            if args.verbose > 1:
-                print(f"Saving models {models} to {Display.models_cache_path()}")
-            Display.save_models_cache(models)
+        if Display._is_cache_changed:
+            Display.save_cache(displays, verbose=args.verbose)
 
     @staticmethod
-    def filter_by_cached_models(
-        displays: List["Display"], verbose: int = 0
-    ) -> List["Display"] | None:
-        models = Display.load_models_cache()
-        if len(displays) != len(models):
-            return None
-        filtered = []
-        for display, model in zip(displays, models):
-            if alt_input_sources.get(model) is not None:
-                filtered.append(display)
-            elif verbose > 1:
-                print(f'Skipped "{model}" by the cached model.')
-        return filtered
-
-    @staticmethod
-    def load_models_cache() -> List[str]:
-        config = configparser.ConfigParser()
-        config.read(Display.models_cache_path())
+    def load_cache(displays: List["Display"], verbose: int = 0) -> None:
+        path = Display.cache_path()
         try:
-            models_str = config.get("DEFAULT", "models")
-            return json.loads(models_str)
-        except configparser.NoOptionError:
-            return []
+            with open(path, "r") as fp:
+                cache = json.load(fp)
+        except FileNotFoundError:
+            return
+        if verbose > 1:
+            print(f"Cache loaded from {path}")
+        for display, model in zip(displays, cache["models"]):
+            display._model_cache = model
 
     @staticmethod
-    def save_models_cache(models: List[str]) -> None:
-        config = configparser.ConfigParser()
-        config.set("DEFAULT", "models", json.dumps(models))
-        path = Display.models_cache_path()
+    def save_cache(displays: List["Display"], verbose: int = 0) -> None:
+        cache = {
+            "models": [display._model_cache for display in displays],
+        }
+        path = Display.cache_path()
         os.makedirs(os.path.dirname(path), exist_ok=True)
-        with open(path, "w") as file:
-            config.write(file)
+        with open(path, "w") as fp:
+            json.dump(cache, fp)
+        if verbose > 1:
+            print(f"Cache saved to {path}")
+            with open(path, "r") as fp:
+                print(fp.read())
 
     @staticmethod
-    def models_cache_path() -> str:
+    def cache_path() -> str:
         return os.path.join(
-            platformdirs.user_cache_dir("display", "kojii"), "display.toml"
+            platformdirs.user_cache_dir("display", "kojii"), "display.json"
         )
 
     @staticmethod
@@ -169,9 +162,7 @@ class Display:
         elif args.target is None:
             args.is_current_primary = None
         else:
-            raise ValueError(
-                'The target "{}" must be "usb" or "alt".'.format(args.target)
-            )
+            raise ValueError(f'The target "{args.target}" must be "usb" or "alt".')
 
         Display.toggle_all(args)
 
