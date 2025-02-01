@@ -6,7 +6,7 @@
 #
 import argparse
 import json
-import os
+from pathlib import Path
 import platformdirs
 from typing import List
 from typing import TypeAlias
@@ -120,8 +120,7 @@ class Display:
         cache = {
             "models": [display._model_cache for display in displays],
         }
-        path = Display.cache_path()
-        os.makedirs(os.path.dirname(path), exist_ok=True)
+        path = Display.cache_path(ensure_exists=True)
         with open(path, "w") as fp:
             json.dump(cache, fp)
         if verbose > 1:
@@ -130,10 +129,8 @@ class Display:
                 print(fp.read())
 
     @staticmethod
-    def cache_path() -> str:
-        return os.path.join(
-            platformdirs.user_cache_dir("display", "kojii"), "display.json"
-        )
+    def cache_path(ensure_exists: bool = False) -> Path:
+        return Path(platformdirs.user_cache_dir("display", ensure_exists=ensure_exists)) / "display.json"
 
     @staticmethod
     def run_by_ddm():
