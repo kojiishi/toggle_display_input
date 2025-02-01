@@ -70,10 +70,7 @@ class Display:
         Display.load_cache(displays, verbose=args.verbose)
         for display in displays:
             # Check the `_model_cache` before to avoid unnecessary `with`.
-            if (
-                display._model_cache is not None
-                and alt_input_sources.get(display._model_cache) is None
-            ):
+            if display._model_cache not in alt_input_sources:
                 if args.verbose > 1:
                     print(f"{display._model_cache}: No changes (cached)")
                 continue
@@ -130,7 +127,10 @@ class Display:
 
     @staticmethod
     def cache_path(ensure_exists: bool = False) -> Path:
-        return Path(platformdirs.user_cache_dir("display", ensure_exists=ensure_exists)) / "display.json"
+        return (
+            Path(platformdirs.user_cache_dir("display", ensure_exists=ensure_exists))
+            / "display.json"
+        )
 
     @staticmethod
     def run_by_ddm():
