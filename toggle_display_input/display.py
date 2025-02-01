@@ -30,6 +30,11 @@ class Display:
         self._monitor = monitor
         self._vcp_capabilities_cache = None
 
+    @staticmethod
+    def get_all() -> List["Display"]:
+        monitors = monitorcontrol.get_monitors()
+        return [Display(monitor) for monitor in monitors]
+
     @property
     def _vcp_capabilities(self) -> dict:
         if self._vcp_capabilities_cache is None:
@@ -56,8 +61,7 @@ class Display:
 
     @staticmethod
     def toggle_all(args):
-        monitors = monitorcontrol.get_monitors()
-        displays = [Display(monitor) for monitor in monitors]
+        displays = Display.get_all()
 
         filtered_displays = Display.filter_by_cached_models(
             displays, verbose=args.verbose
