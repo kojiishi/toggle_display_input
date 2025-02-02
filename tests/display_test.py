@@ -32,6 +32,8 @@ def test_cache() -> None:
     assert path.exists()
 
     displays = [Display(None), Display(None)]
+    assert displays[0]._model is None
+    assert displays[1]._model is None
     cache = Display.Cache(displays, path=path)
     assert displays[0]._model == "model0"
     assert displays[1]._model == "model1"
