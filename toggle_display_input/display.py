@@ -132,18 +132,6 @@ class Display:
                 return fp.read()
 
     @staticmethod
-    def run_by_ddm():
-        import subprocess
-
-        ddm = "C:/Program Files/Dell/Dell Display Manager 2/DDM"
-        proc = subprocess.run(
-            [ddm, "/Console", "start", "/ReadActiveInput"],
-            capture_output=True,
-            text=True,
-        )
-        print(proc)
-
-    @staticmethod
     def toggle_cmd():
         parser = argparse.ArgumentParser()
         parser.add_argument("-n", "--dryrun", action="store_true")
