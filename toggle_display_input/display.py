@@ -103,10 +103,15 @@ class Display:
             cache.save()
 
     class Cache:
-        def __init__(self, displays: List["Display"], verbose: int = 0):
+        def __init__(
+            self,
+            displays: List["Display"],
+            path: Path = Path(platformdirs.user_cache_dir("display")) / "display.json",
+            verbose: int = 0,
+        ):
             self.displays = displays
+            self.path = path
             self.verbose = verbose
-            self.path = Path(platformdirs.user_cache_dir("display")) / "display.json"
             try:
                 with open(self.path, "r") as fp:
                     cache = json.load(fp)
