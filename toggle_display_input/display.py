@@ -67,10 +67,13 @@ class Display:
     @staticmethod
     def toggle_all(args):
         displays = Display.get_all()
-        Display.load_cache(displays, verbose=args.verbose)
+        cache = Display.Cache(displays, verbose=args.verbose)
         for display in displays:
             # Check the `_model_cache` before to avoid unnecessary `with`.
-            if display._model_cache not in alt_input_sources:
+            if (
+                display._model_cache is not None
+                and display._model_cache not in alt_input_sources
+            ):
                 if args.verbose > 1:
                     print(f"{display._model_cache}: No changes (cached)")
                 continue
@@ -97,40 +100,36 @@ class Display:
                     display._input_source = new_input_source
 
         if Display._is_cache_changed:
-            Display.save_cache(displays, verbose=args.verbose)
+            cache.save()
 
-    @staticmethod
-    def load_cache(displays: List["Display"], verbose: int = 0) -> None:
-        path = Display.cache_path()
-        try:
-            with open(path, "r") as fp:
-                cache = json.load(fp)
-        except FileNotFoundError:
-            return
-        if verbose > 1:
-            print(f"Cache loaded from {path}")
-        for display, model in zip(displays, cache["models"]):
-            display._model_cache = model
+    class Cache:
+        def __init__(self, displays: List["Display"], verbose: int = 0):
+            self.displays = displays
+            self.verbose = verbose
+            self.path = Path(platformdirs.user_cache_dir("display")) / "display.json"
+            try:
+                with open(self.path, "r") as fp:
+                    cache = json.load(fp)
+            except FileNotFoundError:
+                return
+            if self.verbose > 1:
+                print(f"Cache loaded from <{self.path}>\n{self.read()}")
+            for display, model in zip(self.displays, cache["models"]):
+                display._model_cache = model
 
-    @staticmethod
-    def save_cache(displays: List["Display"], verbose: int = 0) -> None:
-        cache = {
-            "models": [display._model_cache for display in displays],
-        }
-        path = Display.cache_path(ensure_exists=True)
-        with open(path, "w") as fp:
-            json.dump(cache, fp)
-        if verbose > 1:
-            print(f"Cache saved to {path}")
-            with open(path, "r") as fp:
-                print(fp.read())
+        def save(self) -> None:
+            cache = {
+                "models": [display._model_cache for display in self.displays],
+            }
+            self.path.parent.mkdir(parents=True, exist_ok=True)
+            with open(self.path, "w") as fp:
+                json.dump(cache, fp)
+            if self.verbose > 1:
+                print(f"Cache saved to <{self.path}>\n{self.read()}")
 
-    @staticmethod
-    def cache_path(ensure_exists: bool = False) -> Path:
-        return (
-            Path(platformdirs.user_cache_dir("display", ensure_exists=ensure_exists))
-            / "display.json"
-        )
+        def read(self) -> str:
+            with open(self.path, "r") as fp:
+                return fp.read()
 
     @staticmethod
     def run_by_ddm():
