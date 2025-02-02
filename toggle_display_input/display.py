@@ -132,22 +132,23 @@ class Display:
                 return fp.read()
 
     @staticmethod
+    def parse_target(target) -> bool | None:
+        if target == "usb":
+            return False
+        if target == "alt":
+            return True
+        if target is None:
+            return None
+        raise ValueError(f'The target "{target}" must be "usb" or "alt".')
+
+    @staticmethod
     def toggle_cmd():
         parser = argparse.ArgumentParser()
         parser.add_argument("-n", "--dryrun", action="store_true")
         parser.add_argument("-v", "--verbose", action="count", default=0)
         parser.add_argument("target", nargs="?", help="usb|alt")
         args = parser.parse_args()
-
-        if args.target == "usb":
-            args.is_current_primary = False
-        elif args.target == "alt":
-            args.is_current_primary = True
-        elif args.target is None:
-            args.is_current_primary = None
-        else:
-            raise ValueError(f'The target "{args.target}" must be "usb" or "alt".')
-
+        args.is_current_primary = Display.parse_target(args.target)
         Display.toggle_all(args)
 
 
