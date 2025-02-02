@@ -51,7 +51,7 @@ class Display:
         return self._model
 
     @property
-    def _input_source(self) -> InputSource:
+    def input_source(self) -> InputSource:
         try:
             return self._monitor.get_input_source()
         except monitorcontrol.monitorcontrol.InputSourceValueError as e:
@@ -60,9 +60,9 @@ class Display:
             # https://github.com/newAM/monitorcontrol/issues/258
             return e.value
 
-    @_input_source.setter
-    def _input_source(self, input_source: InputSource) -> None:
-        self._monitor.set_input_source(input_source)
+    @input_source.setter
+    def input_source(self, new_input_source: InputSource) -> None:
+        self._monitor.set_input_source(new_input_source)
 
     @staticmethod
     def toggle_all(args):
@@ -86,7 +86,7 @@ class Display:
 
                 if args.is_current_primary is None:
                     args.is_current_primary = (
-                        display._input_source == primary_input_source
+                        display.input_source == primary_input_source
                     )
                 if args.is_current_primary:
                     new_input_source = alt_input_source
@@ -94,7 +94,7 @@ class Display:
                     new_input_source = primary_input_source
                 print(f"{model}: Switch to {new_input_source}")
                 if not args.dryrun:
-                    display._input_source = new_input_source
+                    display.input_source = new_input_source
 
         if Display._is_cache_changed:
             cache.save()
