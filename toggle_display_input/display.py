@@ -6,13 +6,17 @@
 #
 import argparse
 import json
+import logging
 from pathlib import Path
+import sys
 import platformdirs
 from typing import List
 from typing import TypeAlias
 
 # https://newam.github.io/monitorcontrol/api.html
 import monitorcontrol
+
+logger = logging.getLogger("display")
 
 InputSource: TypeAlias = monitorcontrol.InputSource | int
 
@@ -41,6 +45,7 @@ class Display:
     def vcp_capabilities(self) -> dict:
         if self._vcp_capabilities is None:
             self._vcp_capabilities = self._monitor.get_vcp_capabilities()
+            logger.debug("vcp_capabilities=%s", self._vcp_capabilities)
         return self._vcp_capabilities
 
     @property
@@ -67,21 +72,17 @@ class Display:
     @staticmethod
     def toggle_all(args):
         displays = Display.get_all()
-        cache = Display.Cache(displays, verbose=args.verbose)
+        cache = Display.Cache(displays)
         for display in displays:
             # Check the `_model` before to avoid unnecessary `with`.
             if display._model is not None and display._model not in alt_input_sources:
-                if args.verbose > 1:
-                    print(f"{display._model}: No changes (cached)")
+                logger.debug("%s: No changes (cached)", display._model)
                 continue
             with display._monitor:
-                if args.verbose > 1:
-                    print(display.vcp_capabilities)
                 model = display.model
                 alt_input_source = alt_input_sources.get(model)
                 if alt_input_source is None:
-                    if args.verbose:
-                        print(f"{model}: No changes")
+                    logger.info("%s: No changes", model)
                     continue
 
                 if args.is_current_primary is None:
@@ -92,7 +93,7 @@ class Display:
                     new_input_source = alt_input_source
                 else:
                     new_input_source = primary_input_source
-                print(f"{model}: Switch to {new_input_source}")
+                logger.info("%s: Switch to %s", model, new_input_source)
                 if not args.dryrun:
                     display.input_source = new_input_source
 
@@ -104,18 +105,15 @@ class Display:
             self,
             displays: List["Display"],
             path: Path = Path(platformdirs.user_cache_dir("display")) / "display.json",
-            verbose: int = 0,
         ):
             self.displays = displays
             self.path = path
-            self.verbose = verbose
             try:
                 with open(self.path, "r") as fp:
                     cache = json.load(fp)
             except FileNotFoundError:
                 return
-            if self.verbose > 1:
-                print(f"Cache loaded from <{self.path}>\n{self.read()}")
+            logger.debug("Cache loaded from <%s>\n%s", self.path, self.read())
             for display, model in zip(self.displays, cache["models"]):
                 display._model = model
 
@@ -126,12 +124,20 @@ class Display:
             self.path.parent.mkdir(parents=True, exist_ok=True)
             with open(self.path, "w") as fp:
                 json.dump(cache, fp)
-            if self.verbose > 1:
-                print(f"Cache saved to <{self.path}>\n{self.read()}")
+            logger.debug("Cache saved to <%s>\n%s", self.path, self.read())
 
         def read(self) -> str:
             with open(self.path, "r") as fp:
                 return fp.read()
+
+    @staticmethod
+    def init_log(verbose: int) -> None:
+        if verbose <= 0:
+            handler = logging.StreamHandler(sys.stdout)
+            logger.addHandler(handler)
+            logger.setLevel(logging.INFO)
+            return
+        logging.basicConfig(level=logging.DEBUG)
 
     @staticmethod
     def parse_target(target) -> bool | None:
@@ -150,6 +156,7 @@ class Display:
         parser.add_argument("-v", "--verbose", action="count", default=0)
         parser.add_argument("target", nargs="?", help="usb|alt")
         args = parser.parse_args()
+        Display.init_log(args.verbose)
         args.is_current_primary = Display.parse_target(args.target)
         Display.toggle_all(args)
 
