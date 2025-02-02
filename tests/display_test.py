@@ -21,17 +21,17 @@ def test_cache() -> None:
 
     displays = [Display(None), Display(None)]
     cache = Display.Cache(displays, path=path)
-    assert displays[0]._model_cache is None
-    assert displays[1]._model_cache is None
+    assert displays[0]._model is None
+    assert displays[1]._model is None
 
-    displays[0]._model_cache = "model0"
-    displays[1]._model_cache = "model1"
+    displays[0]._model = "model0"
+    displays[1]._model = "model1"
     cache.save()
     assert path.exists()
 
     displays = [Display(None), Display(None)]
     cache = Display.Cache(displays, path=path)
-    assert displays[0]._model_cache == "model0"
-    assert displays[1]._model_cache == "model1"
+    assert displays[0]._model == "model0"
+    assert displays[1]._model == "model1"
 
     path.unlink(missing_ok=True)

@@ -27,8 +27,8 @@ alt_input_sources = {
 class Display:
     def __init__(self, monitor: monitorcontrol.Monitor):
         self._monitor = monitor
-        self._vcp_capabilities_cache = None
-        self._model_cache = None
+        self._vcp_capabilities = None
+        self._model = None
 
     _is_cache_changed = False
 
@@ -38,17 +38,17 @@ class Display:
         return [Display(monitor) for monitor in monitors]
 
     @property
-    def _vcp_capabilities(self) -> dict:
-        if self._vcp_capabilities_cache is None:
-            self._vcp_capabilities_cache = self._monitor.get_vcp_capabilities()
-        return self._vcp_capabilities_cache
+    def vcp_capabilities(self) -> dict:
+        if self._vcp_capabilities is None:
+            self._vcp_capabilities = self._monitor.get_vcp_capabilities()
+        return self._vcp_capabilities
 
     @property
-    def _model(self) -> str:
-        if self._model_cache is None:
-            self._model_cache = self._vcp_capabilities["model"]
+    def model(self) -> str:
+        if self._model is None:
+            self._model = self.vcp_capabilities["model"]
             Display._is_cache_changed = True
-        return self._model_cache
+        return self._model
 
     @property
     def _input_source(self) -> InputSource:
@@ -69,18 +69,15 @@ class Display:
         displays = Display.get_all()
         cache = Display.Cache(displays, verbose=args.verbose)
         for display in displays:
-            # Check the `_model_cache` before to avoid unnecessary `with`.
-            if (
-                display._model_cache is not None
-                and display._model_cache not in alt_input_sources
-            ):
+            # Check the `_model` before to avoid unnecessary `with`.
+            if display._model is not None and display._model not in alt_input_sources:
                 if args.verbose > 1:
-                    print(f"{display._model_cache}: No changes (cached)")
+                    print(f"{display._model}: No changes (cached)")
                 continue
             with display._monitor:
                 if args.verbose > 1:
-                    print(display._vcp_capabilities)
-                model = display._model
+                    print(display.vcp_capabilities)
+                model = display.model
                 alt_input_source = alt_input_sources.get(model)
                 if alt_input_source is None:
                     if args.verbose:
@@ -120,11 +117,11 @@ class Display:
             if self.verbose > 1:
                 print(f"Cache loaded from <{self.path}>\n{self.read()}")
             for display, model in zip(self.displays, cache["models"]):
-                display._model_cache = model
+                display._model = model
 
         def save(self) -> None:
             cache = {
-                "models": [display._model_cache for display in self.displays],
+                "models": [display._model for display in self.displays],
             }
             self.path.parent.mkdir(parents=True, exist_ok=True)
             with open(self.path, "w") as fp:
