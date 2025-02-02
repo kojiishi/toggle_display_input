@@ -9,12 +9,12 @@ import json
 import logging
 from pathlib import Path
 import sys
-import platformdirs
 from typing import List
 from typing import TypeAlias
 
 # https://newam.github.io/monitorcontrol/api.html
 import monitorcontrol
+import platformdirs
 
 logger = logging.getLogger("display")
 
