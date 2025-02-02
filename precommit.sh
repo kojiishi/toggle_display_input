@@ -1,3 +1,8 @@
 #!/bin/bash
-poetry run black toggle_display_input tests
-poetry run pytest -v
+if [[ -z "$VIRTUAL_ENV" ]]; then
+  echo "Activating Poetry environment and rerunning..."
+  poetry run "$SHELL" "$0" "$@"
+  exit $?
+fi
+black toggle_display_input tests
+pytest -v
