@@ -1,6 +1,7 @@
 from toggle_display_input import Display
 
 from pathlib import Path
+import tempfile
 
 import pytest
 
@@ -16,7 +17,8 @@ def test_parse_target() -> None:
 
 
 def test_cache() -> None:
-    path = Path(Path.cwd() / "test_cache.json")
+    tmp_dir = tempfile.TemporaryDirectory()
+    path = Path(tmp_dir.name) / "test_cache.json"
     path.unlink(missing_ok=True)
 
     displays = [Display(None), Display(None)]
@@ -35,3 +37,4 @@ def test_cache() -> None:
     assert displays[1]._model == "model1"
 
     path.unlink(missing_ok=True)
+    tmp_dir.cleanup()
