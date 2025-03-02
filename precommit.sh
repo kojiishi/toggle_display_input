@@ -1,8 +1,8 @@
 #!/bin/bash
 if [[ -z "$VIRTUAL_ENV" ]]; then
-  echo "Activating Poetry environment and rerunning..."
-  poetry run "$SHELL" "$0" "$@"
+  echo "Activating the virtual environment and rerunning..."
+  uv run "$SHELL" "$0" "$@"
   exit $?
 fi
-black toggle_display_input tests
+black src tests
 pytest -v

@@ -1,22 +1,23 @@
-[tool.poetry]
+[project]
 name = "toggle-display-input"
-version = "0.2.1"
+version = "0.3"
 description = ""
-authors = ["Koji Ishii <kojiishi@gmail.com>"]
 readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "monitorcontrol>=3.1.0",
+    "platformdirs>=4.3.6",
+]
 
-[tool.poetry.dependencies]
-python = "^3.10"
-monitorcontrol = "^3.1.0"
-platformdirs = "^4.3.6"
+[dependency-groups]
+dev = [
+    "black>=25.1.0",
+    "pytest>=8.3.4",
+]
 
-[tool.poetry.scripts]
+[project.scripts]
 toggle-display-input = "toggle_display_input.display:Display.toggle_cmd"
 
-[tool.poetry.group.dev.dependencies]
-pytest = "^8.3.4"
-black = "^25.1.0"
-
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
