@@ -151,11 +151,13 @@ class Display:
         parser.add_argument("target", nargs="?", help="usb|alt")
         args = parser.parse_args()
         Display.init_log(args.verbose)
+        is_current_primary = Display.parse_target(args.target)
+
         displays = Display.get_all()
         cache = Display.Cache(displays)
         Display.toggle_all(
             displays,
-            is_current_primary=Display.parse_target(args.target),
+            is_current_primary=is_current_primary,
             dryrun=args.dryrun,
         )
         if Display._is_cache_changed:
