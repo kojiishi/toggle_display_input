@@ -1,1 +1,1 @@
-from toggle_display_input import Display
+from display import Display

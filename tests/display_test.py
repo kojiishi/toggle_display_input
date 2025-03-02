@@ -1,4 +1,4 @@
-from toggle_display_input import Display
+from display import Display
 
 from pathlib import Path
 import tempfile
