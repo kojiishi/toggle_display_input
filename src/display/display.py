@@ -70,13 +70,16 @@ class Display:
         self._monitor.set_input_source(new_input_source)
 
     @staticmethod
-    def toggle_all(is_current_primary: bool | None = None, dryrun: bool = False):
-        displays = Display.get_all()
-        cache = Display.Cache(displays)
+    def toggle_all(
+        displays: List["Display"],
+        is_current_primary: bool | None = None,
+        dryrun: bool = False,
+    ):
         for display in displays:
             # Check the `_model` before to avoid unnecessary `with`.
-            if display._model is not None and display._model not in alt_input_sources:
-                logger.debug("%s: No changes (cached)", display._model)
+            model = display._model
+            if model is not None and model not in alt_input_sources:
+                logger.debug("%s: No changes (cached)", model)
                 continue
             with display._monitor:
                 model = display.model
@@ -94,9 +97,6 @@ class Display:
                 logger.info("%s: Switch to %s", model, new_input_source)
                 if not dryrun:
                     display.input_source = new_input_source
-
-        if Display._is_cache_changed:
-            cache.save()
 
     class Cache:
         def __init__(
@@ -151,9 +151,15 @@ class Display:
         parser.add_argument("target", nargs="?", help="usb|alt")
         args = parser.parse_args()
         Display.init_log(args.verbose)
+        displays = Display.get_all()
+        cache = Display.Cache(displays)
         Display.toggle_all(
-            is_current_primary=Display.parse_target(args.target), dryrun=args.dryrun
+            displays,
+            is_current_primary=Display.parse_target(args.target),
+            dryrun=args.dryrun,
         )
+        if Display._is_cache_changed:
+            cache.save()
 
 
 if __name__ == "__main__":
