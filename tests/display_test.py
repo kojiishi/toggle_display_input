@@ -9,10 +9,10 @@ import pytest
 
 class MockMonitor:
     def __init__(self):
-        pass
+        self.enter_count = 0
 
     def __enter__(self):
-        pass
+        self.enter_count += 1
 
     def __exit__(self, exc_type, exc_value, traceback):
         pass
@@ -26,13 +26,18 @@ class MockDisplay:
         self._monitor = MockMonitor()
 
 
-def test_toggle_all() -> None:
+@pytest.mark.parametrize("cached", [False, True])
+def test_toggle_all(cached: bool) -> None:
+    # Create the mock data.
     displays = [
         MockDisplay("P2415Q", 1),
         MockDisplay("", 1),
         MockDisplay("U2723QX", 27),
         MockDisplay("P3223QE", 27),
     ]
+    if cached:
+        for display in displays:
+            display._model = display.model
 
     # Toggle to switch them to alternative inputs.
     Display.toggle_all(displays)
@@ -42,15 +47,16 @@ def test_toggle_all() -> None:
         monitorcontrol.InputSource.DP1,
         monitorcontrol.InputSource.HDMI1,
     ]
+    assert [display._monitor.enter_count for display in displays] == (
+        [0, 0, 1, 1] if cached else [1, 1, 1, 1]
+    )
 
     # Toggle again to switch them back to primary inputs.
     Display.toggle_all(displays)
-    assert [display.input_source for display in displays] == [
-        1,
-        1,
-        27,
-        27,
-    ]
+    assert [display.input_source for display in displays] == [1, 1, 27, 27]
+    assert [display._monitor.enter_count for display in displays] == (
+        [0, 0, 2, 2] if cached else [2, 2, 2, 2]
+    )
 
 
 def test_parse_target() -> None:
