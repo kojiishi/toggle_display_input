@@ -70,7 +70,7 @@ class Display:
         self._monitor.set_input_source(new_input_source)
 
     @staticmethod
-    def toggle_all(args):
+    def toggle_all(is_current_primary: bool | None = None, dryrun: bool = False):
         displays = Display.get_all()
         cache = Display.Cache(displays)
         for display in displays:
@@ -85,16 +85,14 @@ class Display:
                     logger.info("%s: No changes", model)
                     continue
 
-                if args.is_current_primary is None:
-                    args.is_current_primary = (
-                        display.input_source == primary_input_source
-                    )
-                if args.is_current_primary:
+                if is_current_primary is None:
+                    is_current_primary = display.input_source == primary_input_source
+                if is_current_primary:
                     new_input_source = alt_input_source
                 else:
                     new_input_source = primary_input_source
                 logger.info("%s: Switch to %s", model, new_input_source)
-                if not args.dryrun:
+                if not dryrun:
                     display.input_source = new_input_source
 
         if Display._is_cache_changed:
@@ -157,8 +155,9 @@ class Display:
         parser.add_argument("target", nargs="?", help="usb|alt")
         args = parser.parse_args()
         Display.init_log(args.verbose)
-        args.is_current_primary = Display.parse_target(args.target)
-        Display.toggle_all(args)
+        Display.toggle_all(
+            is_current_primary=Display.parse_target(args.target), dryrun=args.dryrun
+        )
 
 
 if __name__ == "__main__":
