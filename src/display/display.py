@@ -111,7 +111,7 @@ class Display:
                     cache = json.load(fp)
             except FileNotFoundError:
                 return
-            logger.debug("Cache loaded from <%s>\n%s", self.path, self.read())
+            logger.debug("Cache loaded from <%s>", self.path)
             for display, model in zip(self.displays, cache["models"]):
                 display._model = model
 
@@ -122,11 +122,7 @@ class Display:
             self.path.parent.mkdir(parents=True, exist_ok=True)
             with open(self.path, "w") as fp:
                 json.dump(cache, fp)
-            logger.debug("Cache saved to <%s>\n%s", self.path, self.read())
-
-        def read(self) -> str:
-            with open(self.path, "r") as fp:
-                return fp.read()
+            logger.debug("Cache saved to <%s>", self.path)
 
     @staticmethod
     def init_log(verbose: int) -> None:
