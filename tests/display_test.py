@@ -3,7 +3,54 @@ from display import Display
 from pathlib import Path
 import tempfile
 
+import monitorcontrol
 import pytest
+
+
+class MockMonitor:
+    def __init__(self):
+        pass
+
+    def __enter__(self):
+        pass
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        pass
+
+
+class MockDisplay:
+    def __init__(self, model, input_source, _model=None):
+        self.model = model
+        self.input_source = input_source
+        self._model = _model
+        self._monitor = MockMonitor()
+
+
+def test_toggle_all() -> None:
+    displays = [
+        MockDisplay("P2415Q", 1),
+        MockDisplay("", 1),
+        MockDisplay("U2723QX", 27),
+        MockDisplay("P3223QE", 27),
+    ]
+
+    # Toggle to switch them to alternative inputs.
+    Display.toggle_all(displays)
+    assert [display.input_source for display in displays] == [
+        1,
+        1,
+        monitorcontrol.InputSource.DP1,
+        monitorcontrol.InputSource.HDMI1,
+    ]
+
+    # Toggle again to switch them back to primary inputs.
+    Display.toggle_all(displays)
+    assert [display.input_source for display in displays] == [
+        1,
+        1,
+        27,
+        27,
+    ]
 
 
 def test_parse_target() -> None:
