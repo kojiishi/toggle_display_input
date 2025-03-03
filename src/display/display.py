@@ -73,7 +73,7 @@ class Display:
     def toggle_all(
         displays: List["Display"],
         is_current_primary: bool | None = None,
-        dryrun: bool = False,
+        is_dry_run: bool = False,
     ):
         for display in displays:
             # Check the `_model` before to avoid unnecessary `with`.
@@ -95,7 +95,7 @@ class Display:
                 else:
                     new_input_source = primary_input_source
                 logger.info("%s: Switch to %s", model, new_input_source)
-                if not dryrun:
+                if not is_dry_run:
                     display.input_source = new_input_source
 
     class Cache:
@@ -146,7 +146,7 @@ class Display:
     @staticmethod
     def toggle_cmd():
         parser = argparse.ArgumentParser()
-        parser.add_argument("-n", "--dryrun", action="store_true")
+        parser.add_argument("-n", "--dry-run", action="store_true")
         parser.add_argument("-v", "--verbose", action="count", default=0)
         parser.add_argument("target", nargs="?", help="usb|alt")
         args = parser.parse_args()
@@ -158,7 +158,7 @@ class Display:
         Display.toggle_all(
             displays,
             is_current_primary=is_current_primary,
-            dryrun=args.dryrun,
+            is_dry_run=args.dry_run,
         )
         if Display._is_cache_changed:
             cache.save()
