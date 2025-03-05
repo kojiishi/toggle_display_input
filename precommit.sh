@@ -4,5 +4,6 @@ if [[ -z "$VIRTUAL_ENV" ]]; then
   uv run "$SHELL" "$0" "$@"
   exit $?
 fi
+
 black src tests
 pytest -v
