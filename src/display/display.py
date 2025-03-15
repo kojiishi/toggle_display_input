@@ -103,9 +103,14 @@ class Display:
             self,
             displays: List["Display"],
             path: Path = Path(platformdirs.user_cache_dir("display")) / "display.json",
+            load: bool = True,
         ):
             self.displays = displays
             self.path = path
+            if load:
+                self.load()
+
+        def load(self) -> None:
             try:
                 with open(self.path, "r") as fp:
                     cache = json.load(fp)
@@ -146,6 +151,7 @@ class Display:
     @staticmethod
     def toggle_cmd():
         parser = argparse.ArgumentParser()
+        parser.add_argument("-f", "--no-cache", action="store_true")
         parser.add_argument("-n", "--dry-run", action="store_true")
         parser.add_argument("-v", "--verbose", action="count", default=0)
         parser.add_argument("target", nargs="?", help="usb|alt")
@@ -154,7 +160,7 @@ class Display:
         is_current_primary = Display.parse_target(args.target)
 
         displays = Display.get_all()
-        cache = Display.Cache(displays)
+        cache = Display.Cache(displays, load=not args.no_cache)
         Display.toggle_all(
             displays,
             is_current_primary=is_current_primary,
