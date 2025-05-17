@@ -16,6 +16,8 @@ from typing import TypeAlias
 import monitorcontrol
 import platformdirs
 
+from display import __version__
+
 logger = logging.getLogger("display")
 
 InputSource: TypeAlias = monitorcontrol.InputSource | int
@@ -155,6 +157,9 @@ class Display:
         parser.add_argument("-n", "--dry-run", action="store_true")
         parser.add_argument("-v", "--verbose", action="count", default=0)
         parser.add_argument("target", nargs="?", help="usb|alt")
+        parser.add_argument(
+            "-V", "--version", action="version", version=f"%(prog)s {__version__}"
+        )
         args = parser.parse_args()
         Display.init_log(args.verbose)
         is_current_primary = Display.parse_target(args.target)
