@@ -1,6 +1,7 @@
 [project]
 name = "toggle-display-input"
-version = "0.3.6"
+# version = "0.3.6"
+dynamic = ["version"]
 description = ""
 readme = "README.md"
 requires-python = ">=3.10"
@@ -8,6 +9,9 @@ dependencies = [
     "monitorcontrol>=3.1.0",
     "platformdirs>=4.3.6",
 ]
+
+[project.urls]
+repository = "https://github.com/kojiishi/toggle_display_input"
 
 [dependency-groups]
 dev = [
@@ -19,8 +23,11 @@ dev = [
 toggle-display-input = "display.display:Display.toggle_cmd"
 
 [build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+requires = ["setuptools >= 77.0.3", "setuptools-scm>=8"]
+build-backend = "setuptools.build_meta"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/display"]
+
+[tool.setuptools_scm]
+version_file = "src/display/_version.py"

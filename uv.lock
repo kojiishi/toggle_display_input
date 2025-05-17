@@ -163,7 +163,6 @@ wheels = [
 
 [[package]]
 name = "toggle-display-input"
-version = "0.3.6"
 source = { editable = "." }
 dependencies = [
     { name = "monitorcontrol" },
