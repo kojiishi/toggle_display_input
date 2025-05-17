@@ -34,3 +34,11 @@ jobs:
     - name: Test with pytest
       run: |
         uv run pytest
+
+    - name: Style
+      run: |
+        uv run ruff format --check
+
+    - name: Lint
+      run: |
+        uv run ruff check

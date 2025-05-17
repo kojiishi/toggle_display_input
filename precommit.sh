@@ -5,5 +5,6 @@ if [[ -z "$VIRTUAL_ENV" ]]; then
   exit $?
 fi
 
-black src tests
 pytest -v
+ruff format
+ruff check "$@"

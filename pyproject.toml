@@ -15,8 +15,8 @@ repository = "https://github.com/kojiishi/toggle_display_input"
 
 [dependency-groups]
 dev = [
-    "black>=25.1.0",
-    "pytest>=8.3.4",
+    "pytest>=8.3.5",
+    "ruff>=0.11.10",
 ]
 
 [project.scripts]
@@ -28,6 +28,10 @@ build-backend = "setuptools.build_meta"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/display"]
+
+[tool.pytest.ini_options]
+pythonpath = "src"
+testpaths = ["tests",]
 
 [tool.setuptools_scm]
 version_file = "src/display/_version.py"
