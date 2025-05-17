@@ -60,8 +60,8 @@ def test_toggle_all(cached: bool) -> None:
 
 
 def test_parse_target() -> None:
-    assert Display.parse_target("usb") == False
-    assert Display.parse_target("alt") == True
+    assert not Display.parse_target("usb")
+    assert Display.parse_target("alt")
     assert Display.parse_target(None) is None
     with pytest.raises(ValueError):
         Display.parse_target("")
