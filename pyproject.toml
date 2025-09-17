@@ -34,4 +34,7 @@ pythonpath = "src"
 testpaths = ["tests",]
 
 [tool.setuptools_scm]
+# https://github.com/pypa/setuptools-scm
 version_file = "src/display/_version.py"
+# https://github.com/dependabot/dependabot-core/issues/12340
+fallback_version = "0.0.0"
