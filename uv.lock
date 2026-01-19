@@ -34,14 +34,14 @@ wheels = [
 
 [[package]]
 name = "monitorcontrol"
-version = "4.1.1"
+version = "4.2.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "pyudev", marker = "sys_platform != 'win32'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/c8/cb/6c5cfaedb7264235b80cbddffdc2f6973fc5c04b7c84555a6470c449877f/monitorcontrol-4.1.1.tar.gz", hash = "sha256:6b2277872466c43e20a663e28082ec367610b063f8bad149c379186717903b51", size = 17969, upload-time = "2025-05-30T02:06:46.077Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/6d/28/c832e6479d62ac9a1f96fd76cf0148c06ee00a3e4ca26d106c2c7cd0ebd8/monitorcontrol-4.2.0.tar.gz", hash = "sha256:2686024adfecf01c3ee73c93d369bd0890fbb20e12522cb981afa27b13026b33", size = 18911, upload-time = "2026-01-03T18:32:26.34Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/03/41/860d7e837093625ae025e214747703c27f6d538ccf2feac3afaec2c15b3c/monitorcontrol-4.1.1-py3-none-any.whl", hash = "sha256:7f50331bc0691c912618f683d7abab565ff2b4b74b72d64e4824a6653ec307cb", size = 16485, upload-time = "2025-05-30T02:06:44.742Z" },
+    { url = "https://files.pythonhosted.org/packages/8c/cb/fdf3bdbbfe947bf6746a3549d968d77979c670e113b3210d96c185b31051/monitorcontrol-4.2.0-py3-none-any.whl", hash = "sha256:0e8fcfd21fede1b99f26f41d359b2cdecb43f62b3f803c8cb6ad3a896a77ff84", size = 17136, upload-time = "2026-01-03T18:32:25.414Z" },
 ]
 
 [[package]]
