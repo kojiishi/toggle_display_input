@@ -7,7 +7,7 @@ readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
     "monitorcontrol>=3.1.0",
-    "platformdirs>=4.3.6",
+    "platformdirs>=4.9.6",
 ]
 
 [project.urls]
@@ -15,8 +15,8 @@ repository = "https://github.com/kojiishi/toggle_display_input"
 
 [dependency-groups]
 dev = [
-    "pytest>=8.3.5",
-    "ruff>=0.11.10",
+    "pytest>=9.0.3",
+    "ruff>=0.15.10",
 ]
 
 [project.scripts]
