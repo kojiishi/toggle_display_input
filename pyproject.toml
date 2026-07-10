@@ -16,7 +16,7 @@ repository = "https://github.com/kojiishi/toggle_display_input"
 [dependency-groups]
 dev = [
     "pytest>=9.1.1",
-    "ruff>=0.15.20",
+    "ruff>=0.15.21",
 ]
 
 [project.scripts]
